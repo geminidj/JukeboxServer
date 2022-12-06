@@ -6,10 +6,14 @@ function createRouter(db) {
     
     router.post('/addsong', (req, res, next) => {
 
+        console.log("addsong called");
+        
         const songID = req.body.songID;
         const username = req.body.username;
         const userIP = req.body.userIP;
         const message = req.body.message;
+        
+        console.log(req.body);
         
         db.query(
             'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
@@ -27,8 +31,23 @@ function createRouter(db) {
     
 
     router.get('/getqueue', function (req, res, next) {
+
         db.query(
             'SELECT id, songID, artist, title FROM queuelist',
+            (error, results) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).json({status: 'error'});
+                } else {
+                    res.status(200).json(results);
+                }
+            }
+        );
+    });
+
+    router.get('/getnowplaying', function (req, res, next) {
+        db.query(
+            'SELECT ID, artist, title FROM history ORDER BY ID DESC LIMIT 1',
             (error, results) => {
                 if (error) {
                     console.log(error);
@@ -42,7 +61,7 @@ function createRouter(db) {
     
     router.get('/getallsongs', (req,res) =>{
         db.query(
-            'SELECT artist, title FROM songs',
+            'SELECT ID, artist, title FROM songs',
             (error, results) => {
                 if (error) {
                     console.log(error);
