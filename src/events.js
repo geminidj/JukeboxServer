@@ -28,7 +28,22 @@ function createRouter(db) {
             }
         );
     });
-    
+
+    router.get('/getnumberofsongs', function (req, res, next) {
+
+        db.query(
+            'SELECT COUNT(*) as count FROM songs',
+            (error, results) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).json({status: 'error'});
+                } else {
+                    console.log(results);
+                    res.status(200).json(results);
+                }
+            }
+        );
+    });
 
     router.get('/getqueue', function (req, res, next) {
 
