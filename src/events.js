@@ -5,15 +5,11 @@ function createRouter(db) {
     const router = express.Router();
     
     router.post('/addsong', (req, res, next) => {
-
-        console.log("addsong called");
         
         const songID = req.body.songID;
         const username = req.body.username;
         const userIP = req.body.userIP;
         const message = req.body.message;
-        
-        console.log(req.body);
         
         db.query(
             'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
@@ -38,7 +34,6 @@ function createRouter(db) {
                     console.log(error);
                     res.status(500).json({status: 'error'});
                 } else {
-                    console.log(results);
                     res.status(200).json(results);
                 }
             }
@@ -63,6 +58,26 @@ function createRouter(db) {
     router.get('/getnowplaying', function (req, res, next) {
         db.query(
             'SELECT ID, artist, title FROM history ORDER BY ID DESC LIMIT 1',
+            (error, results) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).json({status: 'error'});
+                } else {
+                    res.status(200).json(results);
+                }
+            }
+        );
+    });
+    
+    router.post('/getnumsongs', function (req, res, next) {
+        
+        const numSongs = Number(req.body.numSongs);
+        const baseSong = req.body.baseSong;
+        const topSong = baseSong + numSongs;
+        
+        db.query(
+            'SELECT ID, artist, title FROM songs WHERE ID BETWEEN ? and ? LIMIT ?',
+            [baseSong,topSong,numSongs],
             (error, results) => {
                 if (error) {
                     console.log(error);
