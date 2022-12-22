@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,25 +29,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ],
-    "rider.external.source.directories": [
-      "C:\\Users\\Greg\\AppData\\Roaming\\JetBrains\\Rider2022.3\\resharper-host\\DecompilerCache",
-      "C:\\Users\\Greg\\AppData\\Roaming\\JetBrains\\Rider2022.3\\resharper-host\\SourcesCache",
-      "C:\\Users\\Greg\\AppData\\Local\\Symbols\\src"
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\Greg\\AppData\\Roaming\\JetBrains\\Rider2022.3\\resharper-host\\DecompilerCache&quot;,
+      &quot;C:\\Users\\Greg\\AppData\\Roaming\\JetBrains\\Rider2022.3\\resharper-host\\SourcesCache&quot;,
+      &quot;C:\\Users\\Greg\\AppData\\Local\\Symbols\\src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Node.js.index.js">
     <configuration name="index2.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/src/index2.js" working-dir="$PROJECT_DIR$/src">
       <method v="2" />
@@ -79,6 +78,9 @@
       <workItem from="1670331565552" duration="3581000" />
       <workItem from="1670423789311" duration="5737000" />
       <workItem from="1670853181977" duration="1341000" />
+      <workItem from="1670862709813" duration="1208000" />
+      <workItem from="1670921819739" duration="613000" />
+      <workItem from="1671458863729" duration="707000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <created>1670316877347</created>
@@ -94,7 +96,14 @@
       <option name="project" value="LOCAL" />
       <updated>1670335433560</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="v3">
+      <created>1670876145740</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1670876145740</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,6 +126,7 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="v2" />
     <MESSAGE value="added getnumberofsongs" />
-    <option name="LAST_COMMIT_MESSAGE" value="added getnumberofsongs" />
+    <MESSAGE value="v3" />
+    <option name="LAST_COMMIT_MESSAGE" value="v3" />
   </component>
 </project>

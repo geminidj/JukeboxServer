@@ -102,22 +102,51 @@ function createRouter(db) {
             }
         )
     })
+    
+    
+    //USERS
 
-    /* Delete event - Removed for now
-    router.delete('/event/:id', function (req, res, next) {
+    router.post('/adduser', (req, res, next) => {
+
+        const email = req.body.email;
+        const name = req.body.name;
+        const picture = req.body.picture;
+
         db.query(
-            'DELETE FROM events WHERE id=? AND owner=?',
-            [req.params.id, owner],
-            (error) => {
+            'SELECT * FROM website_users WHERE email LIKE ? ',
+            [email],
+            (error,results) => {
                 if (error) {
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
-                    res.status(200).json({status: 'ok'});
+                    
+                    if(results.length > 0){
+                        //User already in database - Ignore
+                        res.status(200).json({status: 'user already in DB'});
+                    }
+                    else{
+                        //User not in database - Write user to database
+                        db.query(
+                            'INSERT INTO website_users (email, name, picture) VALUES (?,?,?)',
+                            [email, name, picture],
+                            (error) => {
+                                if (error) {
+                                    console.error(error);
+                                    res.status(500).json({status: 'error'});
+                                } else {
+                                    res.status(200).json({status: 'ok'});
+                                }
+                            }
+                        );
+                    }
+                    
+                    
+                    
                 }
             }
         );
     });
-    */
      
 
     return router;
