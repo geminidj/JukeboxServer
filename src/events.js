@@ -2,6 +2,8 @@
 const bodyParser = require("body-parser");
 const {DATETIME, DATE, DATETIME2} = require("mysql/lib/protocol/constants/types");
 
+const maxDailyRequests = 50;
+
 function createRouter(db) {
     const router = express.Router();
     
@@ -11,20 +13,70 @@ function createRouter(db) {
         const username = req.body.username;
         const userIP = req.body.userIP;
         const message = req.body.message;
-        
+
         db.query(
-            'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
-            [songID, username, userIP, message],
-            (error) => {
+            'SELECT * FROM website_users WHERE email LIKE ?',
+            [username],
+            (error, results) => {
                 if (error) {
-                    console.error(error);
+                    console.log(error);
                     res.status(500).json({status: 'error'});
-                } else {
-                    res.status(200).json({status: 'ok'});
+                } else if (results.length === 1){
+
+                    let tableyear = results[0].lastrequestdate.getFullYear();
+                    let tablemonth = results[0].lastrequestdate.getMonth() + 1;
+                    let tableday = results[0].lastrequestdate.getDate();
+                    let numrequests = results[0].requeststoday;
+                    
+                    if(usedAllRequests(tableday, tablemonth, tableyear, numrequests, username)){
+                        //All requests used - No more requests
+                        res.status(200).json({status:'daily requests exceeded'})
+                    }
+                    else{
+                        //More requests allowed
+                        db.query(
+                            'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
+                            [songID, username, userIP, message],
+                            (error) => {
+                                if (error) {
+                                    console.error(error);
+                                    res.status(500).json({status: 'something went wrong adding song to queue'});
+                                } else {
+                                    res.status(200).json({status: 'ok'});
+                                }
+                            }
+                        );
+                    }
+                }
+                else{
+                    res.status(500).json({status: 'more than 1 result in website_users table: tell Greg (seriously)'})
                 }
             }
         );
     });
+    
+    router.get('/getmaxdailyrequests', function(req,res,next){
+        res.status(200).json({playcount:maxDailyRequests});
+    })
+    
+    router.post('/getuserdailyrequests', function (req, res, next){
+        
+        const email = req.body.email;
+        
+        db.query(
+            'SELECT requeststoday FROM website_users WHERE email LIKE ?',
+            [email],
+            (error, results) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).json({status: 'error'});
+                } else {
+                    res.status(200).json(results);
+                }
+            }
+        );
+    })
+    
 
     router.get('/getnumberofsongs', function (req, res, next) {
 
@@ -89,30 +141,7 @@ function createRouter(db) {
             }
         );
     });
-
-    router.post('/gettodaysplaycount', function (req, res, next) {
-
-        const email = req.body.email;
-        let count = 0;
-
-        db.query(
-            'SELECT ID, requested FROM requests WHERE username LIKE ?',
-            [email],
-            (error, results) => {
-                if (error) {
-                    console.log(error);
-                    res.status(500).json({status: 'error'});
-                } else {
-                    let count = getRequestCount(results)
-                    
-                    res.status(200).json(count);
-                }
-            }
-        );
-    });
-
-   
-
+    
     router.get('/getallsongs', (req,res) =>{
         db.query(
             'SELECT ID, artist, title FROM songs',
@@ -135,6 +164,8 @@ function createRouter(db) {
         const email = req.body.email;
         const name = req.body.name;
         const picture = req.body.picture;
+        const numrequests = 0;
+        
 
         db.query(
             'SELECT * FROM website_users WHERE email LIKE ? ',
@@ -152,8 +183,8 @@ function createRouter(db) {
                     else{
                         //User not in database - Write user to database
                         db.query(
-                            'INSERT INTO website_users (email, name, picture) VALUES (?,?,?)',
-                            [email, name, picture],
+                            'INSERT INTO website_users (email, name, picture,requeststoday) VALUES (?,?,?,?)',
+                            [email, name, picture, numrequests],
                             (error) => {
                                 if (error) {
                                     console.error(error);
@@ -232,6 +263,52 @@ function createRouter(db) {
             }
         })
         return count;
+    }
+    
+    function usedAllRequests(day, month, year, numrequests, email){
+        
+        let date = new Date();
+        let newday = date.getDate();
+        let newmonth = date.getMonth() + 1;
+        let newyear = date.getFullYear();
+        
+        if ((day === newday) && (month === newmonth) && (year === newyear)){
+
+            if(numrequests > maxDailyRequests){
+                console.log(email + " has requested too many songs");
+                return true;
+            }
+            
+            db.query(
+                'UPDATE website_users SET requeststoday = ? WHERE email LIKE ?',
+                [(numrequests + 1),email],
+                (error) => {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        console.log("Play count updated for " + email + " to " + (numrequests+1));
+                    }
+                }
+            )
+            
+            return numrequests >= maxDailyRequests;
+        }
+        else{
+
+            db.query(
+                'UPDATE website_users SET requeststoday = 1, lastrequestdate = ? WHERE email LIKE ?',
+                [date,email],
+                (error) => {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        console.log("Date updated for " + email);
+                    }
+                }
+            )
+            
+            return false;
+        }
     }
      
 
