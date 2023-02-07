@@ -1,6 +1,4 @@
 ﻿const express = require('express');
-const bodyParser = require("body-parser");
-const {DATETIME, DATE, DATETIME2} = require("mysql/lib/protocol/constants/types");
 
 const maxDailyRequests = 50;
 
