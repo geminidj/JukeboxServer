@@ -2,11 +2,6 @@
 const cors = require('cors');
 const mysql = require('mysql');
 const events = require('./events');
-const {Server} = require('socket.io');
-const socketServer = require('express')();
-const http = require('http').Server(socketServer);
-const io = require('socket.io')(http);
-
 const connection = mysql.createConnection({
     host     : 'localhost',
     user     : 'radiodj-smart',
@@ -21,26 +16,43 @@ const port = process.env.PORT || 8080;
 const app = express()
     .use(cors())
     .use(express.urlencoded())
-    .use(events(connection));
+    .use(events(connection))
 
 app.listen(port, () => {
     console.log(`Express server listening on port ${port}`);
 });
 
-socketServer.use(cors());
-
-socketServer.get('/', function(req, res){ res.sendFile('C:/test/index.html');
+const socketapp = require('express')();
+const http = require('http').createServer(socketapp);
+const io = require('socket.io')(http, {
+    cors: {
+        origins: ['http://localhost:4200']
+    }
 });
 
-//Whenever someone connects this gets executed
-io.on('connection', function(socket){
-    console.log('A user connected');
+app.get('/', (req, res) => {
+    res.send('<h1>Hey Socket.io</h1>');
+});
 
-    //Whenever someone disconnects this piece of code executed
-    socket.on('disconnect', function () {
-        console.log('A user disconnected');
+io.on('connection', (socket) => {
+    console.log('User connected. ID: ' + socket.id);
+    socket.on('disconnect', () => {
+        console.log(socket.id + ' disconnected');
     });
+
+    socket.on('trigger queue update',(msg)=>{
+        console.log("Someone added a song to the queue");
+        io.emit('broadcast queue update', `someone has clicked to update the queue`);
+    })
+
+    socket.on('trigger nowplaying update',(msg)=>{
+        console.log("The currently playing song has changed");
+        io.emit('broadcast nowplaying update', `update the nowplaying song`);
+    })
+
 });
-http.listen(3000, function(){
+
+
+http.listen(3000, () => {
     console.log('Socket.IO listening on 3000');
 });
