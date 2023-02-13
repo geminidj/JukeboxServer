@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -95,6 +96,8 @@
       <workItem from="1675689198720" duration="15638000" />
       <workItem from="1675789251403" duration="691000" />
       <workItem from="1675790608379" duration="3610000" />
+      <workItem from="1675962572778" duration="2212000" />
+      <workItem from="1676297317442" duration="7227000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <created>1670316877347</created>
@@ -131,7 +134,14 @@
       <option name="project" value="LOCAL" />
       <updated>1675776615094</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="v7 - WIP - End of day 7th Feb - Added Socket.IO support to application. When the queue is updated on one client, a message is recieved on all clients telling them to update the queue.&#10;&#10;Next task: Transform the message recieved into a queue update">
+      <created>1675802322503</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1675802322503</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -157,6 +167,7 @@
     <MESSAGE value="v3" />
     <MESSAGE value="Added POST /gettodaysplaycount" />
     <MESSAGE value="updating npm packages" />
-    <option name="LAST_COMMIT_MESSAGE" value="updating npm packages" />
+    <MESSAGE value="v7 - WIP - End of day 7th Feb - Added Socket.IO support to application. When the queue is updated on one client, a message is recieved on all clients telling them to update the queue.&#10;&#10;Next task: Transform the message recieved into a queue update" />
+    <option name="LAST_COMMIT_MESSAGE" value="v7 - WIP - End of day 7th Feb - Added Socket.IO support to application. When the queue is updated on one client, a message is recieved on all clients telling them to update the queue.&#10;&#10;Next task: Transform the message recieved into a queue update" />
   </component>
 </project>

@@ -47,7 +47,7 @@ function createRouter(db) {
                     }
                 }
                 else{
-                    res.status(500).json({status: 'more than 1 result in website_users table: tell Greg (seriously)'})
+                    res.status(500).json({status: results});
                 }
             }
         );

@@ -35,19 +35,13 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('User connected. ID: ' + socket.id);
-    socket.on('disconnect', () => {
-        console.log(socket.id + ' disconnected');
-    });
-
-    socket.on('trigger queue update',(msg)=>{
-        console.log("Someone added a song to the queue");
-        io.emit('broadcast queue update', `someone has clicked to update the queue`);
+    
+    socket.on('update nowplaying',(msg)=>{
+        io.emit('update nowplaying', `update nowplaying`);
     })
-
-    socket.on('trigger nowplaying update',(msg)=>{
-        console.log("The currently playing song has changed");
-        io.emit('broadcast nowplaying update', `update the nowplaying song`);
+    
+    socket.on('new song', (msg)=>{
+        io.emit('song lookout', msg);
     })
 
 });
@@ -56,3 +50,5 @@ io.on('connection', (socket) => {
 http.listen(3000, () => {
     console.log('Socket.IO listening on 3000');
 });
+
+
