@@ -40,6 +40,7 @@ function createRouter(db) {
                                     console.error(error);
                                     res.status(500).json({status: 'something went wrong adding song to queue'});
                                 } else {
+                                    disableSong(songID);
                                     res.status(200).json({status: 'ok'});
                                 }
                             }
@@ -142,7 +143,7 @@ function createRouter(db) {
     
     router.get('/getallsongs', (req,res) =>{
         db.query(
-            'SELECT ID, artist, title FROM songs',
+            'SELECT ID, artist, title, date_played, soft_enabled FROM songs',
             (error, results) => {
                 if (error) {
                     console.log(error);
@@ -153,6 +154,24 @@ function createRouter(db) {
             }
         )
     })
+
+    router.post('/enablesong', function (req, res, next) {
+
+        const password = req.body.password;
+        const songID = req.body.songid;
+        
+        console.log("enablesong message recieved");
+        console.log(password);
+        console.log(songID);
+
+        if(password === '4HgghP03Qau4lcbcxZ5p60zWjRjc'){
+            enableSong(songID);
+            res.status(200).json({status: 'song enabled'})
+        }
+        else{
+            console.log("incorrect password when enabling song");
+        }
+    });
     
     
     //USERS
@@ -200,6 +219,32 @@ function createRouter(db) {
             }
         );
     });
+    
+    function disableSong(songID){
+        db.query(
+            'UPDATE songs SET soft_enabled = 0 WHERE ID LIKE ?',
+            [songID],
+            (error) => {
+                if (error) {
+                    console.log("ERROR disabling " + songID);
+                    console.error(error);
+                }
+            }
+        )
+    }
+
+    function enableSong(songID){
+        db.query(
+            'UPDATE songs SET soft_enabled = 1 WHERE ID LIKE ?',
+            [songID],
+            (error) => {
+                if (error) {
+                    console.log("ERROR enabling " + songID);
+                    console.error(error);
+                }
+            }
+        )
+    }
     
     
     //HELPER METHODS

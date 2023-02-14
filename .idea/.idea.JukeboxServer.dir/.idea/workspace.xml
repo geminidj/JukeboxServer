@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v7 - End of Day 13th Feb 2023. Adding support for dynamic updating page content.">
+    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v7 - Web page content dynamically updates on changes">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +15,19 @@
       <list>
         <option value="JavaScript File" />
       </list>
+    </option>
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="d7c00198-7cb8-4186-940d-fa028d794539" />
+        <option name="url" value="https://github.com/geminidj/JukeboxServer.git" />
+      </UrlAndAccount>
     </option>
   </component>
   <component name="HighlightingSettingsPerFile">
@@ -148,7 +160,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676314246523</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="v7 - Web page content dynamically updates on changes">
+      <created>1676381714335</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1676381714335</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -176,6 +195,7 @@
     <MESSAGE value="updating npm packages" />
     <MESSAGE value="v7 - WIP - End of day 7th Feb - Added Socket.IO support to application. When the queue is updated on one client, a message is recieved on all clients telling them to update the queue.&#10;&#10;Next task: Transform the message recieved into a queue update" />
     <MESSAGE value="v7 - End of Day 13th Feb 2023. Adding support for dynamic updating page content." />
-    <option name="LAST_COMMIT_MESSAGE" value="v7 - End of Day 13th Feb 2023. Adding support for dynamic updating page content." />
+    <MESSAGE value="v7 - Web page content dynamically updates on changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="v7 - Web page content dynamically updates on changes" />
   </component>
 </project>
