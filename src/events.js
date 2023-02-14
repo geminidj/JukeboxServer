@@ -94,7 +94,7 @@ function createRouter(db) {
     router.get('/getqueue', function (req, res, next) {
 
         db.query(
-            'SELECT id, songID, artist, title FROM queuelist',
+            'SELECT id, songID, artist, title, ETA FROM queuelist',
             (error, results) => {
                 if (error) {
                     console.log(error);

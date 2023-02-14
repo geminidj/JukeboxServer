@@ -43,6 +43,14 @@ io.on('connection', (socket) => {
     socket.on('new song', (msg)=>{
         io.emit('song lookout', msg);
     })
+    
+    socket.on('update playcount',(msg)=>{
+        io.emit('update playcount', 'update playcount');
+    })
+    
+    socket.on('set eta',(theTime)=>{
+        io.emit('set eta', theTime);
+    })
 
 });
 
