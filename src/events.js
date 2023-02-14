@@ -1,6 +1,4 @@
 ﻿const express = require('express');
-const bodyParser = require("body-parser");
-const {DATETIME, DATE, DATETIME2} = require("mysql/lib/protocol/constants/types");
 
 const maxDailyRequests = 50;
 
@@ -49,7 +47,7 @@ function createRouter(db) {
                     }
                 }
                 else{
-                    res.status(500).json({status: 'more than 1 result in website_users table: tell Greg (seriously)'})
+                    res.status(500).json({status: results});
                 }
             }
         );
@@ -96,7 +94,7 @@ function createRouter(db) {
     router.get('/getqueue', function (req, res, next) {
 
         db.query(
-            'SELECT id, songID, artist, title FROM queuelist',
+            'SELECT id, songID, artist, title, ETA FROM queuelist',
             (error, results) => {
                 if (error) {
                     console.log(error);
