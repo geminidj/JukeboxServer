@@ -159,10 +159,6 @@ function createRouter(db) {
 
         const password = req.body.password;
         const songID = req.body.songid;
-        
-        console.log("enablesong message recieved");
-        console.log(password);
-        console.log(songID);
 
         if(password === '4HgghP03Qau4lcbcxZ5p60zWjRjc'){
             enableSong(songID);
