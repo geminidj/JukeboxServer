@@ -1,12 +1,20 @@
 ﻿const express = require('express');
+const io_client = require('socket.io-client');
 
 const maxDailyRequests = 50;
+let oldSongID = 0;
 
 function createRouter(db) {
-    const router = express.Router();
     
-    router.post('/addsong', (req, res, next) => {
-        
+    const router = express.Router();
+    const ioclient = io_client.connect('http://localhost:3000');
+
+    setInterval(function (){
+        checkForNewSong();
+    },1000)
+    
+    router.post('/addsong', (req, res) => {
+
         const songID = req.body.songID;
         const username = req.body.username;
         const userIP = req.body.userIP;
@@ -19,46 +27,54 @@ function createRouter(db) {
                 if (error) {
                     console.log(error);
                     res.status(500).json({status: 'error'});
-                } else if (results.length === 1){
+                } else if (results.length === 1) {
 
+                    let reenableuser = results[0].reenableUser;
                     let tableyear = results[0].lastrequestdate.getFullYear();
                     let tablemonth = results[0].lastrequestdate.getMonth() + 1;
                     let tableday = results[0].lastrequestdate.getDate();
                     let numrequests = results[0].requeststoday;
+
+ 
                     
-                    if(usedAllRequests(tableday, tablemonth, tableyear, numrequests, username)){
-                        //All requests used - No more requests
-                        res.status(200).json({status:'daily requests exceeded'})
-                    }
-                    else{
-                        //More requests allowed
-                        db.query(
-                            'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
-                            [songID, username, userIP, message],
-                            (error) => {
-                                if (error) {
-                                    console.error(error);
-                                    res.status(500).json({status: 'something went wrong adding song to queue'});
-                                } else {
-                                    disableSong(songID);
-                                    res.status(200).json({status: 'ok'});
+                    if(new Date() > reenableuser) {
+
+                        if (usedAllRequests(tableday, tablemonth, tableyear, numrequests, username)) {
+                            //All requests used - No more requests
+                            res.status(200).json({status: 'daily requests exceeded'})
+                        } else {
+                            //More requests allowed
+                            db.query(
+                                'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
+                                [songID, username, userIP, message],
+                                (error) => {
+                                    if (error) {
+                                        console.error(error);
+                                        res.status(500).json({status: 'something went wrong adding song to queue'});
+                                    } else {
+                                        disableSong(songID);
+                                        cooldownUser(reenableuser, username);
+                                        res.status(200).json({status: 'ok'});
+                                    }
                                 }
-                            }
-                        );
+                            );
+                        }
+                    }else{
+                        //TODO - Set up a friendly return to the request with some helpful error message
+                        console.log("user in cooldown");
                     }
-                }
-                else{
+                } else {
                     res.status(500).json({status: results});
                 }
             }
         );
     });
     
-    router.get('/getmaxdailyrequests', function(req,res,next){
+    router.get('/getmaxdailyrequests', function(req,res){
         res.status(200).json({playcount:maxDailyRequests});
     })
     
-    router.post('/getuserdailyrequests', function (req, res, next){
+    router.post('/getuserdailyrequests', function (req, res){
         
         const email = req.body.email;
         
@@ -77,7 +93,7 @@ function createRouter(db) {
     })
     
 
-    router.get('/getnumberofsongs', function (req, res, next) {
+    router.get('/getnumberofsongs', function (req, res) {
 
         db.query(
             'SELECT COUNT(*) as count FROM songs',
@@ -92,7 +108,7 @@ function createRouter(db) {
         );
     });
 
-    router.get('/getqueue', function (req, res, next) {
+    router.get('/getqueue', function (req, res) {
 
         db.query(
             'SELECT id, songID, artist, title, ETA FROM queuelist',
@@ -107,7 +123,7 @@ function createRouter(db) {
         );
     });
 
-    router.get('/getnowplaying', function (req, res, next) {
+    router.get('/getnowplaying', function (req, res) {
         db.query(
             'SELECT ID, artist, title FROM history ORDER BY ID DESC LIMIT 1',
             (error, results) => {
@@ -121,7 +137,7 @@ function createRouter(db) {
         );
     });
     
-    router.post('/getnumsongs', function (req, res, next) {
+    router.post('/getnumsongs', function (req, res) {
         
         const numSongs = Number(req.body.numSongs);
         const baseSong = req.body.baseSong;
@@ -155,7 +171,7 @@ function createRouter(db) {
         )
     })
 
-    router.post('/enablesong', function (req, res, next) {
+    router.post('/enablesong', function (req, res) {
 
         const password = req.body.password;
         const songID = req.body.songid;
@@ -171,8 +187,26 @@ function createRouter(db) {
     
     
     //USERS
+    
+    router.post('/getcooldown', (req, res)=>{
+        const email = req.body.email;
 
-    router.post('/adduser', (req, res, next) => {
+        db.query(
+            'SELECT * FROM website_users WHERE email LIKE ?',
+            [email],
+            (error, results) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).json({status: 'error'});
+                } else{
+                    console.log(JSON.stringify(results));
+                    res.status(200).json(results);
+                }
+            }
+        )
+    })
+
+    router.post('/adduser', (req, res) => {
 
         const email = req.body.email;
         const name = req.body.name;
@@ -216,6 +250,33 @@ function createRouter(db) {
         );
     });
     
+    //Calculates how long a user must wait in cooldown before being able to make another request
+    function calculateCooldown(){
+       
+        let result = new Date();
+        
+        result.setMinutes(result.getMinutes() + 1);
+        return result;
+    }
+    
+    function cooldownUser(date, email){
+        
+        let resumeDate = calculateCooldown();
+        
+        db.query(
+            'UPDATE website_users SET reenableUser = ? WHERE email LIKE ?',
+            [resumeDate, email],
+            (error) => {
+                if (error) {
+                    console.log("ERROR setting lastrequestdatetime");
+                    console.error(error);
+                }else{
+                    ioclient.emit("update cooldown", email);
+                }
+            }
+        )
+    }
+    
     function disableSong(songID){
         db.query(
             'UPDATE songs SET soft_enabled = 0 WHERE ID LIKE ?',
@@ -244,6 +305,27 @@ function createRouter(db) {
     
     
     //HELPER METHODS
+    
+    function checkForNewSong(){
+        db.query(
+            'SELECT ID FROM history ORDER BY ID DESC LIMIT 1',
+            (error, results) => {
+                if (error) {
+                    console.error("Something went wrong in checkForNewSong()");
+                    console.log(error);
+                } else {
+                    if(results[0].ID === oldSongID){
+                        //song hasnt changed, no nothing
+                    }
+                    else{
+                        //song has changed - do something
+                        oldSongID = results[0].ID;
+                        ioclient.emit("update nowplaying", "update nowplaying");
+                    }
+                }
+            }
+        );
+    }
     function wasToday(incoming) {
 
         let today = new Date()

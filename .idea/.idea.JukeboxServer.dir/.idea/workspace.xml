@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v7 - Web page content dynamically updates on changes">
+    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +171,21 @@
       <option name="project" value="LOCAL" />
       <updated>1676381714335</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown">
+      <created>1676408978795</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1676408978795</updated>
+    </task>
+    <task id="LOCAL-00010" summary="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown">
+      <created>1676409011749</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1676409011749</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -196,6 +214,7 @@
     <MESSAGE value="v7 - WIP - End of day 7th Feb - Added Socket.IO support to application. When the queue is updated on one client, a message is recieved on all clients telling them to update the queue.&#10;&#10;Next task: Transform the message recieved into a queue update" />
     <MESSAGE value="v7 - End of Day 13th Feb 2023. Adding support for dynamic updating page content." />
     <MESSAGE value="v7 - Web page content dynamically updates on changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="v7 - Web page content dynamically updates on changes" />
+    <MESSAGE value="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown" />
+    <option name="LAST_COMMIT_MESSAGE" value="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown" />
   </component>
 </project>

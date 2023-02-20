@@ -35,13 +35,19 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    console.log("Client has connected: " + socket.id);
     
     socket.on('update nowplaying',(msg)=>{
         io.emit('update nowplaying', `update nowplaying`);
+        io.emit('update queue', `update queue`);
     })
     
-    socket.on('new song', (msg)=>{
-        io.emit('song lookout', msg);
+    socket.on('update cooldown',(email)=>{
+        io.emit('update cooldown', email);
+    })
+    
+    socket.on('new song', (songID)=>{
+        io.emit('song lookout', songID);
     })
     
     socket.on('update playcount',(msg)=>{
@@ -58,5 +64,3 @@ io.on('connection', (socket) => {
 http.listen(3000, () => {
     console.log('Socket.IO listening on 3000');
 });
-
-
