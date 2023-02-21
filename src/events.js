@@ -1,5 +1,6 @@
 ﻿const express = require('express');
 const io_client = require('socket.io-client');
+const {request} = require("express");
 
 const maxDailyRequests = 50;
 let oldSongID = 0;
@@ -12,7 +13,12 @@ function createRouter(db) {
     setInterval(function (){
         checkForNewSong();
     },1000)
-    
+
+    setInterval(function (){
+        reenableSongs();
+    },10000)
+
+
     router.post('/addsong', (req, res) => {
 
         const songID = req.body.songID;
@@ -170,24 +176,8 @@ function createRouter(db) {
             }
         )
     })
-
-    router.post('/enablesong', function (req, res) {
-
-        const password = req.body.password;
-        const songID = req.body.songid;
-
-        if(password === '4HgghP03Qau4lcbcxZ5p60zWjRjc'){
-            enableSong(songID);
-            res.status(200).json({status: 'song enabled'})
-        }
-        else{
-            console.log("incorrect password when enabling song");
-        }
-    });
-    
     
     //USERS
-    
     router.post('/getcooldown', (req, res)=>{
         const email = req.body.email;
 
@@ -242,9 +232,6 @@ function createRouter(db) {
                             }
                         );
                     }
-                    
-                    
-                    
                 }
             }
         );
@@ -289,22 +276,52 @@ function createRouter(db) {
             }
         )
     }
-
-    function enableSong(songID){
-        db.query(
-            'UPDATE songs SET soft_enabled = 1 WHERE ID LIKE ?',
-            [songID],
-            (error) => {
-                if (error) {
-                    console.log("ERROR enabling " + songID);
-                    console.error(error);
-                }
-            }
-        )
-    }
     
     
     //HELPER METHODS
+    
+    function reenableSongs(){
+        db.query(
+            'SELECT * FROM songs WHERE soft_enabled = 0',
+            (error, results) => {
+                let playedDate;
+                let disabledDate;
+                if (error) {
+                    console.error("Something went wrong searching for songs to reenable");
+                    console.log(error);
+                } else {
+                    if (results.length > 0) {
+                        //at least one song found that has been disabled - test if they should be re-enabled
+                        for (let i = 0; i < results.length; i++) {
+                            disabledDate = new Date(results[i].date_disabled);
+                            playedDate = new Date(results[i].date_played);
+
+                            if (disabledDate < playedDate) {
+                                //Song has been played since it was disabled - Start timer for re-enable.
+                                playedDate.setHours(playedDate.getHours() + 6);
+                                if(playedDate < new Date()){
+                                    //reenable song
+                                    db.query(
+                                        'UPDATE songs SET soft_enabled = 1 WHERE ID LIKE ?',
+                                        [results[i].ID],
+                                        (error) => {
+                                            if (error) {
+                                                console.error(error);
+                                                console.log("Error re-enabling song with ID: " + results[i].ID);
+                                            } else {
+                                                console.log("Re-enabling song ID: " + results[i].ID);
+                                            }
+                                        }
+                                    )
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
     
     function checkForNewSong(){
         db.query(
