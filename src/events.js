@@ -1,7 +1,7 @@
 ﻿const express = require('express');
 const io_client = require('socket.io-client');
-const {request} = require("express");
 
+const totalDailyVotes = 1000;
 const maxDailyRequests = 50;
 let oldSongID = 0;
 
@@ -17,6 +17,96 @@ function createRouter(db) {
     setInterval(function (){
         reenableSongs();
     },10000)
+    
+    router.post('/addvotes',(req,res)=>{
+        
+        console.log("addvotes called");
+        const email = req.body.email;
+        const votes = Number(req.body.votes);
+        const songID = req.body.songid;
+        let fixedVotes = 0;
+        let numVotes = 0;
+
+        console.log("email: " + email);
+        console.log("votes: " + votes);
+        console.log("songID: " + songID);
+
+        
+        db.query(
+            'SELECT * FROM website_users WHERE email LIKE ?',
+            [email],
+            (error, results)=>{
+                if(error){
+                    console.error("Error adding votes")
+                    console.error(error);
+                }else{
+                    console.log("Stage 1")
+                    console.log(JSON.stringify(results));
+                    
+                    if (votes < 0){
+                        fixedVotes = votes * -1;
+                    }else{
+                        fixedVotes = votes;
+                    }
+
+                    console.log("*****");
+                    console.log(results[0].votesused);
+                    console.log(fixedVotes);
+                    
+                    let newTotalvotes = results[0].votesused + fixedVotes
+                    
+                    console.log(newTotalvotes);
+                    
+                    if(newTotalvotes > totalDailyVotes){
+                        //num votes user has submitted is higher than the daily limit
+                        res.status(200).json({message:'daily vote limit exceeded'});
+                    }else{
+                        //UPDATE THE VOTES
+                        db.query(
+                            'SELECT * FROM queuelist WHERE songID LIKE ?',
+                            [songID],
+                            (error,results)=>{
+                                if(error){
+                                    console.log("Error querying number of votes");
+                                    console.log(error)
+                                }
+                                else if(results.length === 1){
+                                    numVotes = results[0].votes + votes;
+                                    db.query(
+                                        'UPDATE queuelist SET votes = ? WHERE songID LIKE ?',
+                                        [numVotes,songID],
+                                        (error,results)=>{
+                                            if(error){
+                                                console.log(error);
+                                            }
+                                            if(results.affectedRows > 0){
+                                                ioclient.emit("update queue", "update queue");
+                                            }
+                                            //UPDATE THE QUERY
+                                            db.query(
+                                                'UPDATE website_users SET votesused = ? WHERE email LIKE ?',
+                                                [newTotalvotes, email],
+                                                (error) => {
+                                                    if (error) {
+                                                        console.log("Error updating vote count");
+                                                        console.error(error);
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    )
+                                }else{
+                                    console.log("Too many results in query");
+                                }
+                            }
+                        )
+                    }
+                    
+                }
+            }
+        )
+        
+    })
 
 
     router.post('/addsong', (req, res) => {
@@ -77,7 +167,11 @@ function createRouter(db) {
     });
     
     router.get('/getmaxdailyrequests', function(req,res){
-        res.status(200).json({playcount:maxDailyRequests});
+        res.status(200).json({playcount:maxDailyRequests, votecount:totalDailyVotes});
+    })
+
+    router.get('/getmaxdailyvotes', function(req,res){
+        res.status(200).json({votes:getmaxdailyvotes});
     })
     
     router.post('/getuserdailyrequests', function (req, res){
@@ -85,7 +179,7 @@ function createRouter(db) {
         const email = req.body.email;
         
         db.query(
-            'SELECT requeststoday FROM website_users WHERE email LIKE ?',
+            'SELECT requeststoday,votesused FROM website_users WHERE email LIKE ?',
             [email],
             (error, results) => {
                 if (error) {
@@ -97,6 +191,7 @@ function createRouter(db) {
             }
         );
     })
+    
     
 
     router.get('/getnumberofsongs', function (req, res) {
@@ -189,7 +284,7 @@ function createRouter(db) {
                     console.log(error);
                     res.status(500).json({status: 'error'});
                 } else{
-                    console.log(JSON.stringify(results));
+                    //console.log(JSON.stringify(results));
                     res.status(200).json(results);
                 }
             }

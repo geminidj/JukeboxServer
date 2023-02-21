@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="">
+    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v9 - live content tracking is implimented">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
     </list>
@@ -110,7 +110,7 @@
       <workItem from="1675790608379" duration="3610000" />
       <workItem from="1675962572778" duration="2212000" />
       <workItem from="1676297317442" duration="10560000" />
-      <workItem from="1676969496012" duration="6864000" />
+      <workItem from="1676969496012" duration="12419000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <created>1670316877347</created>
@@ -189,7 +189,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676931045475</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="v9 - live content tracking is implimented">
+      <created>1677004230160</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1677004230160</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -220,6 +227,7 @@
     <MESSAGE value="v7 - Web page content dynamically updates on changes" />
     <MESSAGE value="v8 - WIP - Control logic for avoiding duplicates / overplaying songs has been added - Next step - Add a cooldown" />
     <MESSAGE value="end of day 20th Feb - WIP - Adding cooldowns" />
-    <option name="LAST_COMMIT_MESSAGE" value="end of day 20th Feb - WIP - Adding cooldowns" />
+    <MESSAGE value="v9 - live content tracking is implimented" />
+    <option name="LAST_COMMIT_MESSAGE" value="v9 - live content tracking is implimented" />
   </component>
 </project>
