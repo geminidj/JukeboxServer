@@ -463,7 +463,7 @@ function createRouter(db) {
        
         let result = new Date();
         
-        result.setMinutes(result.getMinutes() + 0);
+        result.setMinutes(result.getMinutes() + 1);
         return result;
     }
     
