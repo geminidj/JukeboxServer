@@ -16,21 +16,16 @@ function createRouter(db) {
 
     setInterval(function (){
         reenableSongs();
+        checkForSongTransfer();
     },10000)
     
     router.post('/addvotes',(req,res)=>{
         
-        console.log("addvotes called");
         const email = req.body.email;
         const votes = Number(req.body.votes);
         const songID = req.body.songid;
         let fixedVotes = 0;
         let numVotes = 0;
-
-        console.log("email: " + email);
-        console.log("votes: " + votes);
-        console.log("songID: " + songID);
-
         
         db.query(
             'SELECT * FROM website_users WHERE email LIKE ?',
@@ -40,22 +35,13 @@ function createRouter(db) {
                     console.error("Error adding votes")
                     console.error(error);
                 }else{
-                    console.log("Stage 1")
-                    console.log(JSON.stringify(results));
-                    
                     if (votes < 0){
                         fixedVotes = votes * -1;
                     }else{
                         fixedVotes = votes;
                     }
-
-                    console.log("*****");
-                    console.log(results[0].votesused);
-                    console.log(fixedVotes);
                     
                     let newTotalvotes = results[0].votesused + fixedVotes
-                    
-                    console.log(newTotalvotes);
                     
                     if(newTotalvotes > totalDailyVotes){
                         //num votes user has submitted is higher than the daily limit
@@ -63,24 +49,24 @@ function createRouter(db) {
                     }else{
                         //UPDATE THE VOTES
                         db.query(
-                            'SELECT * FROM queuelist WHERE songID LIKE ?',
+                            'SELECT * FROM voteslist WHERE songID LIKE ?',
                             [songID],
                             (error,results)=>{
                                 if(error){
-                                    console.log("Error querying number of votes");
-                                    console.log(error)
+                                    console.error("Error querying number of votes");
+                                    console.error(error)
                                 }
                                 else if(results.length === 1){
                                     numVotes = results[0].votes + votes;
                                     db.query(
-                                        'UPDATE queuelist SET votes = ? WHERE songID LIKE ?',
+                                        'UPDATE voteslist SET votes = ? WHERE songID LIKE ?',
                                         [numVotes,songID],
                                         (error,results)=>{
                                             if(error){
-                                                console.log(error);
+                                                console.error(error);
                                             }
                                             if(results.affectedRows > 0){
-                                                ioclient.emit("update queue", "update queue");
+                                                //reorderQueue();
                                             }
                                             //UPDATE THE QUERY
                                             db.query(
@@ -88,15 +74,17 @@ function createRouter(db) {
                                                 [newTotalvotes, email],
                                                 (error) => {
                                                     if (error) {
-                                                        console.log("Error updating vote count");
+                                                        console.error("Error updating vote count");
                                                         console.error(error);
                                                     }
+                                                    ioclient.emit("update votes", "update votes");
                                                 }
                                             )
                                         }
                                     )
                                 }else{
-                                    console.log("Too many results in query");
+                                    console.error("Too many/few results in query");
+                                    console.error(JSON.stringify(results));
                                 }
                             }
                         )
@@ -121,7 +109,7 @@ function createRouter(db) {
             [username],
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else if (results.length === 1) {
 
@@ -140,20 +128,37 @@ function createRouter(db) {
                             res.status(200).json({status: 'daily requests exceeded'})
                         } else {
                             //More requests allowed
+
                             db.query(
-                                'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
-                                [songID, username, userIP, message],
-                                (error) => {
+                                'SELECT * FROM songs WHERE ID = ?',
+                                [songID],
+                                (error, songInfo) => {
                                     if (error) {
+                                        console.error("Error retrieving song info");
                                         console.error(error);
-                                        res.status(500).json({status: 'something went wrong adding song to queue'});
-                                    } else {
-                                        disableSong(songID);
-                                        cooldownUser(reenableuser, username);
-                                        res.status(200).json({status: 'ok'});
                                     }
+                                    if(songInfo.length === 1){
+                                        db.query(
+                                            'INSERT INTO voteslist (songID, username, userIP, message, artist, title) VALUES (?,?,?,?,?,?)',
+                                            [songID, username, userIP, message, songInfo[0].artist,songInfo[0].title],
+                                            (error) => {
+                                                if (error) {
+                                                    console.error(error);
+                                                    res.status(500).json({status: 'something went wrong adding song to queue'});
+                                                } else {
+                                                    disableSong(songID);
+                                                    cooldownUser(reenableuser, username);
+                                                    res.status(200).json({status: 'ok'});
+                                                }
+                                            }
+                                        );
+                                    }
+
+
                                 }
-                            );
+                            )
+                            
+
                         }
                     }else{
                         //TODO - Set up a friendly return to the request with some helpful error message
@@ -183,7 +188,7 @@ function createRouter(db) {
             [email],
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
                     res.status(200).json(results);
@@ -191,8 +196,6 @@ function createRouter(db) {
             }
         );
     })
-    
-    
 
     router.get('/getnumberofsongs', function (req, res) {
 
@@ -200,7 +203,7 @@ function createRouter(db) {
             'SELECT COUNT(*) as count FROM songs',
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
                     res.status(200).json(results);
@@ -212,10 +215,26 @@ function createRouter(db) {
     router.get('/getqueue', function (req, res) {
 
         db.query(
-            'SELECT id, songID, artist, title, ETA FROM queuelist',
+            'SELECT * FROM voteslist ORDER BY votes DESC',
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
+                    res.status(500).json({status: 'error'});
+                } else {
+                    res.status(200).json(results);
+                }
+            }
+        );
+    });
+    
+
+    router.get('/getupnext', function (req, res) {
+
+        db.query(
+            'SELECT id, songID, artist, title, votes FROM queuelist',
+            (error, results) => {
+                if (error) {
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
                     res.status(200).json(results);
@@ -229,7 +248,7 @@ function createRouter(db) {
             'SELECT ID, artist, title FROM history ORDER BY ID DESC LIMIT 1',
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
                     res.status(200).json(results);
@@ -249,7 +268,7 @@ function createRouter(db) {
             [baseSong,topSong,numSongs],
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else {
                     res.status(200).json(results);
@@ -263,7 +282,7 @@ function createRouter(db) {
             'SELECT ID, artist, title, date_played, soft_enabled FROM songs',
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else{
                     res.status(200).json(results);
@@ -281,10 +300,9 @@ function createRouter(db) {
             [email],
             (error, results) => {
                 if (error) {
-                    console.log(error);
+                    console.error(error);
                     res.status(500).json({status: 'error'});
                 } else{
-                    //console.log(JSON.stringify(results));
                     res.status(200).json(results);
                 }
             }
@@ -332,6 +350,86 @@ function createRouter(db) {
         );
     });
     
+    function insertIntoRequestTable(id,username,ip,message){
+        db.query(
+            'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
+            [id,username,ip,message],
+            (error)=>{
+                if(error){
+                    console.error("Error inserting into queuelist from votelist");
+                    console.error(error);
+                }
+            }
+        )
+    }
+    
+    function getSongInfo(id) {
+         db.query(
+            'SELECT * FROM songs WHERE ID = ?',
+            [id],
+            (error, results) => {
+                if (error) {
+                    console.error("Error retrieving song info");
+                    console.error(error);
+                }
+                if (results.length === 1) {
+                    return [results[0].artist, results[0].title];
+                }
+
+            }
+        )
+    }
+    
+    function removeFromVotelist(id){
+        db.query(
+            'DELETE FROM voteslist WHERE songID = ?',
+            [id],
+            (error)=>{
+                if(error){
+                    console.error("Error removing song from vote list");
+                    console.error(error);
+                }
+            }
+        )
+    }
+    
+    function checkForSongTransfer(){
+        db.query(
+            'SELECT ID FROM queuelist',
+            (error,results)=>{
+                if(error){
+                    console.error("Error checking queue length");
+                    console.error(error);
+                }
+                if(results.length<3){
+                    //Less than 3 songs in "UP NEXT" section - Add one"
+                    db.query(
+                        'SELECT * FROM voteslist ORDER BY votes DESC LIMIT 1',
+                        (error,results)=>{
+                            if(error){
+                                console.error("Error retrieving songs from votelist");
+                                console.error(error);
+                            }
+                            if(results.length === 0){
+                                //console.log("No songs in votelist to transfer");
+                            }
+                            else if(results.length === 1) {
+                                insertIntoRequestTable(results[0].songID, results[0].username, results[0].userIP, results[0].message);
+                                removeFromVotelist(results[0].songID);
+                                ioclient.emit('update upnext','update upnext');
+                                ioclient.emit("update queue", "update queue");
+                            }
+                            else{
+                                console.error("Too many songs retrieved by query (this is a serious fuckup)")
+                            }
+                        }
+                    )
+                }
+            }
+        )
+        
+    }
+    
     //Calculates how long a user must wait in cooldown before being able to make another request
     function calculateCooldown(){
        
@@ -350,7 +448,7 @@ function createRouter(db) {
             [resumeDate, email],
             (error) => {
                 if (error) {
-                    console.log("ERROR setting lastrequestdatetime");
+                    console.error("ERROR setting lastrequestdatetime");
                     console.error(error);
                 }else{
                     ioclient.emit("update cooldown", email);
@@ -365,7 +463,7 @@ function createRouter(db) {
             [songID],
             (error) => {
                 if (error) {
-                    console.log("ERROR disabling " + songID);
+                    console.error("ERROR disabling " + songID);
                     console.error(error);
                 }
             }
@@ -383,7 +481,7 @@ function createRouter(db) {
                 let disabledDate;
                 if (error) {
                     console.error("Something went wrong searching for songs to reenable");
-                    console.log(error);
+                    console.error(error);
                 } else {
                     if (results.length > 0) {
                         //at least one song found that has been disabled - test if they should be re-enabled
@@ -402,13 +500,10 @@ function createRouter(db) {
                                         (error) => {
                                             if (error) {
                                                 console.error(error);
-                                                console.log("Error re-enabling song with ID: " + results[i].ID);
-                                            } else {
-                                                console.log("Re-enabling song ID: " + results[i].ID);
-                                            }
+                                            } 
                                         }
                                     )
-                                    
+                                    console.log("Song:", results[i].ID, " has been re-enabled");
                                 }
                             }
                         }
@@ -424,7 +519,7 @@ function createRouter(db) {
             (error, results) => {
                 if (error) {
                     console.error("Something went wrong in checkForNewSong()");
-                    console.log(error);
+                    console.error(error);
                 } else {
                     if(results[0].ID === oldSongID){
                         //song hasnt changed, no nothing
@@ -498,19 +593,44 @@ function createRouter(db) {
         return count;
     }
     
+    function resetRequestCount(email){
+        let date = new Date();
+        db.query(
+            'UPDATE website_users SET requeststoday = 1, lastrequestdate = ? WHERE email LIKE ?',
+            [date,email],
+            (error) => {
+                if (error) {
+                    console.error(error);
+                }
+            }
+        )
+    }
+
+    function resetVoteCount(email){
+        let date = new Date();
+        db.query(
+            'UPDATE website_users SET votesused = 0, lastvotedate = ? WHERE email LIKE ?',
+            [date,email],
+            (error) => {
+                if (error) {
+                    console.error(error);
+                }
+            }
+        )
+    }
+    
     function usedAllRequests(day, month, year, numrequests, email){
         
         let date = new Date();
         let newday = date.getDate();
         let newmonth = date.getMonth() + 1;
         let newyear = date.getFullYear();
+
+        if(numrequests > maxDailyRequests){
+            return true;
+        }
         
         if ((day === newday) && (month === newmonth) && (year === newyear)){
-
-            if(numrequests > maxDailyRequests){
-                console.log(email + " has requested too many songs");
-                return true;
-            }
             
             db.query(
                 'UPDATE website_users SET requeststoday = ? WHERE email LIKE ?',
@@ -518,8 +638,6 @@ function createRouter(db) {
                 (error) => {
                     if (error) {
                         console.error(error);
-                    } else {
-                        console.log("Play count updated for " + email + " to " + (numrequests+1));
                     }
                 }
             )
@@ -527,18 +645,10 @@ function createRouter(db) {
             return numrequests >= maxDailyRequests;
         }
         else{
-
-            db.query(
-                'UPDATE website_users SET requeststoday = 1, lastrequestdate = ? WHERE email LIKE ?',
-                [date,email],
-                (error) => {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        console.log("Date updated for " + email);
-                    }
-                }
-            )
+            
+            resetRequestCount(email);
+            resetVoteCount(email);
+            
             
             return false;
         }

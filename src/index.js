@@ -42,9 +42,23 @@ io.on('connection', (socket) => {
         io.emit('update queue', `update queue`);
     })
     
+    socket.on('update votelist',(msg)=>{
+        io.emit('update votelist','update votelist');
+        io.emit('update queue', 'update queue');
+    })
+    
+    socket.on('update upnext', (msg)=>{
+        io.emit('update upnext', msg);
+    })
+    
     socket.on('update cooldown',(email)=>{
         io.emit('update cooldown', email);
     })
+    
+    socket.on('update votes',(message)=>{
+        io.emit('client-update-votes','client-update-votes');
+    })
+    
     
     socket.on('new song', (songID)=>{
         io.emit('song lookout', songID);
