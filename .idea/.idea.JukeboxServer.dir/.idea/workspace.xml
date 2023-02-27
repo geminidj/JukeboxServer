@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="v9 - live content tracking is implimented">
+    <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,6 +112,9 @@
       <workItem from="1675962572778" duration="2212000" />
       <workItem from="1676297317442" duration="10560000" />
       <workItem from="1676969496012" duration="12419000" />
+      <workItem from="1677078962295" duration="12085000" />
+      <workItem from="1677503374782" duration="700000" />
+      <workItem from="1677515334593" duration="12222000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <created>1670316877347</created>
