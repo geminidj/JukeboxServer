@@ -4,6 +4,9 @@ const io_client = require('socket.io-client');
 const totalDailyVotes = 1000;
 const maxDailyRequests = 50;
 let oldSongID = 0;
+let oldSong1 = 0;
+let oldLength = 0;
+
 
 function createRouter(db) {
     
@@ -12,6 +15,7 @@ function createRouter(db) {
 
     setInterval(function (){
         checkForNewSong();
+        checkForUpdatedUpNext();
     },1000)
 
     setInterval(function (){
@@ -350,6 +354,31 @@ function createRouter(db) {
         );
     });
     
+    function checkForUpdatedUpNext(){
+        db.query(
+            'SELECT songID from queuelist',
+            (error,results)=>{
+                if(error){
+                    console.error("Error checking for upnext section");
+                    console.error(error);
+                }
+                if(results[0].songID !== oldSong1){
+                    //List has changed
+                    ioclient.emit('update upnext','update upnext');
+                }
+                if(results.length > oldLength){
+                    //List has changed
+                    ioclient.emit('update upnext','update upnext');
+                }
+                oldSong1 = results[0].songID;
+                oldLength = results.length;
+                //oldSong2 = results[1].songID;
+                //oldSong3 = results[2].songID;
+            }
+        )
+    }
+    
+    
     function insertIntoRequestTable(id,username,ip,message){
         db.query(
             'INSERT INTO requests (songID, username, userIP, message) VALUES (?,?,?,?)',
@@ -416,7 +445,6 @@ function createRouter(db) {
                             else if(results.length === 1) {
                                 insertIntoRequestTable(results[0].songID, results[0].username, results[0].userIP, results[0].message);
                                 removeFromVotelist(results[0].songID);
-                                ioclient.emit('update upnext','update upnext');
                                 ioclient.emit("update queue", "update queue");
                             }
                             else{
@@ -435,7 +463,7 @@ function createRouter(db) {
        
         let result = new Date();
         
-        result.setMinutes(result.getMinutes() + 1);
+        result.setMinutes(result.getMinutes() + 0);
         return result;
     }
     

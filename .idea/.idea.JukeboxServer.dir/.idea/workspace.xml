@@ -4,7 +4,6 @@
     <list default="true" id="a6d32727-22a2-4680-a429-8cd65d2968ac" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JukeboxServer.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/events.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/events.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,6 +114,7 @@
       <workItem from="1677078962295" duration="12085000" />
       <workItem from="1677503374782" duration="700000" />
       <workItem from="1677515334593" duration="12222000" />
+      <workItem from="1677528706907" duration="3370000" />
     </task>
     <task id="LOCAL-00001" summary="v2">
       <created>1670316877347</created>
