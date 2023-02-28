@@ -152,6 +152,8 @@ function createRouter(db) {
                                                 } else {
                                                     disableSong(songID);
                                                     cooldownUser(reenableuser, username);
+                                                    console.log("queue updated");
+                                                    ioclient.emit("update queue", "update queue");
                                                     res.status(200).json({status: 'ok'});
                                                 }
                                             }
@@ -356,24 +358,25 @@ function createRouter(db) {
     
     function checkForUpdatedUpNext(){
         db.query(
-            'SELECT songID from queuelist',
+            'SELECT songID FROM queuelist',
             (error,results)=>{
                 if(error){
                     console.error("Error checking for upnext section");
                     console.error(error);
                 }
-                if(results[0].songID !== oldSong1){
-                    //List has changed
-                    ioclient.emit('update upnext','update upnext');
+                if(results.length > 0) {
+                    if (results[0].songID !== oldSong1) {
+                        //List has changed
+                        ioclient.emit('update upnext', 'update upnext');
+                    }
+                    if (results.length > oldLength) {
+                        //List has changed
+                        ioclient.emit('update upnext', 'update upnext');
+                    }
+                    oldSong1 = results[0].songID;
+                    oldLength = results.length;
                 }
-                if(results.length > oldLength){
-                    //List has changed
-                    ioclient.emit('update upnext','update upnext');
-                }
-                oldSong1 = results[0].songID;
-                oldLength = results.length;
-                //oldSong2 = results[1].songID;
-                //oldSong3 = results[2].songID;
+                
             }
         )
     }

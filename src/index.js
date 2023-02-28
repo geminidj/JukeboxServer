@@ -48,7 +48,11 @@ io.on('connection', (socket) => {
     })
     
     socket.on('update upnext', (msg)=>{
-        io.emit('update upnext', msg);
+        io.emit('update upnext', "update upnext");
+    })
+    
+    socket.on('update queue',(msg)=>{
+        io.emit('update queue', 'update queue');
     })
     
     socket.on('update cooldown',(email)=>{
