@@ -370,7 +370,7 @@ function createRouter(db) {
 
     router.post('/adduser', (req, res) => {
 
-        const addUserPassword = "sdfjngsfjklnboijfno9jivio34902n22";
+        const addUserPassword = "sdfjngsfjklnboijfno9jivio34902n22sgnjkslgbksjbgqr89389b98";
 
         const recievedAddUserPassword = req.body.addUserPassword;
         const email = req.body.email;
@@ -817,10 +817,13 @@ function createRouter(db) {
 
     function usedAllRequests(day, month, year, numrequests, email) {
 
+        
         let date = new Date();
         let newday = date.getDate();
         let newmonth = date.getMonth() + 1;
         let newyear = date.getFullYear();
+        
+        console.log("Testing if user",email," has exceeded their daily limits");
 
         if (numrequests > maxDailyRequests) {
             return true;
