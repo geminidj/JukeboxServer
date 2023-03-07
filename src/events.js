@@ -33,6 +33,8 @@ function createRouter(db) {
         const songID = req.body.songid;
         let fixedVotes = 0;
         let numVotes = 0;
+        
+
 
         db.query(
             'SELECT * FROM website_users WHERE email LIKE ?',
@@ -63,6 +65,7 @@ function createRouter(db) {
                                     console.error("Error querying number of votes");
                                     console.error(error)
                                 } else if (results.length === 1) {
+                                    let oldVotes = results[0].votes;
                                     numVotes = results[0].votes + votes;
                                     db.query(
                                         'UPDATE voteslist SET votes = ? WHERE songID LIKE ?',
@@ -83,6 +86,18 @@ function createRouter(db) {
                                                         console.error("Error updating vote count");
                                                         console.error(error);
                                                     }
+
+                                                    db.query(
+                                                        'INSERT INTO votehistory (email, votesadded, votesbefore, votesafter, songID) VALUES (?,?,?,?,?)',
+                                                        [email,votes,oldVotes,numVotes,songID],
+                                                        (error) => {
+                                                            if (error) {
+                                                                console.error(error);
+                                                            }
+                                                        }
+                                                    );
+                                                    
+                                                    
                                                     ioclient.emit("update votes", "update votes");
                                                 }
                                             )
@@ -337,11 +352,17 @@ function createRouter(db) {
                         console.error("Incorrect number of results returned from website_users table. Num results returned:", results.length);
                     } else {
                         bcrypt.compare(password, results[0].password, (err, response) => {
-                            if(response){
-                                res.status(200).json({info: {email: results[0].email, name:results[0].name, picture: results[0].picture, isLoggedIn: true}});
-                            }
-                            else{
-                                res.status(200).json({success:response});
+                            if (response) {
+                                res.status(200).json({
+                                    info: {
+                                        email: results[0].email,
+                                        name: results[0].name,
+                                        picture: results[0].picture,
+                                        isLoggedIn: true
+                                    }
+                                });
+                            } else {
+                                res.status(200).json({success: response});
                             }
                         })
                     }
@@ -350,21 +371,20 @@ function createRouter(db) {
         )
 
     })
-    
-    router.post('/getsong',(req,res)=>{
+
+    router.post('/getsong', (req, res) => {
         songID = req.body.songID;
-        
+
         db.query(
             'SELECT * FROM songs WHERE ID LIKE ?',
             [songID],
-            (error,results)=>{
-                if(error){
+            (error, results) => {
+                if (error) {
                     res.status(500).json(error);
-                }
-                else{
+                } else {
                     res.status(200).json(results);
                 }
-        }
+            }
         )
     })
 
@@ -415,34 +435,34 @@ function createRouter(db) {
 
         })
     })
-    
-    function resetEnableTimeAndFindDuplicates(songID){
-        console.log("Searching for duplicates of",songID);
+
+    function resetEnableTimeAndFindDuplicates(songID) {
+        console.log("Searching for duplicates of", songID);
         resetEnableTime(songID);
-        
+
         db.query(
             'SELECT ID, artist, title FROM songs WHERE ID like ?',
             [songID],
-            (error,results)=>{
-                if(error){
+            (error, results) => {
+                if (error) {
                     console.error(error);
                 }
-                if(results.length === 1){
-                    
+                if (results.length === 1) {
+
                     console.log(JSON.stringify(results));
                     let artist = results[0].artist.toLowerCase();
                     let title = results[0].title.toLowerCase();
-                    
-                    console.log("BUGHUNT:",artist,title);
-                    
+
+                    console.log("BUGHUNT:", artist, title);
+
                     db.query(
                         'SELECT ID,artist,title FROM songs WHERE soft_enabled = 0',
-                        (error,results)=>{
-                            if(error){
+                        (error, results) => {
+                            if (error) {
                                 console.error(error);
                             }
-                            for(let result of results){
-                                if(result.artist.toLowerCase() === artist && result.title.toLowerCase() === title){
+                            for (let result of results) {
+                                if (result.artist.toLowerCase() === artist && result.title.toLowerCase() === title) {
                                     console.log("Duplicate found", result.ID);
                                     resetEnableTime(result.ID);
                                 }
@@ -453,22 +473,21 @@ function createRouter(db) {
             }
         )
     }
-    
-    function resetEnableTime(songID){
+
+    function resetEnableTime(songID) {
 
         let theDate = new Date();
         theDate.setHours(theDate.getHours() + 6);
         //theDate.setMinutes(theDate.getMinutes() + 10);
-        
+
         db.query(
             'UPDATE songs SET reenable_date = ? WHERE ID LIKE ?',
-            [theDate,songID],
-            (error,results)=>{
-                if(error){
-                    console.error("Error resetting reenable time for songID",songID);
-                }
-                else{
-                    console.log("Reset reenable time for",songID);
+            [theDate, songID],
+            (error, results) => {
+                if (error) {
+                    console.error("Error resetting reenable time for songID", songID);
+                } else {
+                    console.log("Reset reenable time for", songID);
                     console.log(JSON.stringify(results))
                 }
 
@@ -567,7 +586,7 @@ function createRouter(db) {
                                 insertIntoRequestTable(results[0].songID, results[0].username, results[0].userIP, results[0].message);
                                 removeFromVotelist(results[0].songID);
                                 ioclient.emit("update votelist", "update votelist");
-                                
+
                             } else {
                                 console.error("Too many songs retrieved by query (this is a serious fuckup)")
                             }
@@ -605,31 +624,32 @@ function createRouter(db) {
             }
         )
     }
-    function disableSongAndDuplicates(songID){
+
+    function disableSongAndDuplicates(songID) {
         disableSong(songID);
         db.query(
             'SELECT ID,artist,title FROM songs WHERE ID like ?',
             [songID],
-            (error,results)=>{
-                if(error){
+            (error, results) => {
+                if (error) {
                     console.error("Error disabling songs and finding duplicates");
                     console.error(error)
                 }
-                if(results.length ===1){
+                if (results.length === 1) {
                     let artist = results[0].artist.toLowerCase();
                     let title = results[0].title.toLowerCase();
                     db.query(
                         'SELECT ID,artist,title FROM songs',
-                        (error,results)=>{
-                            if(error){
+                        (error, results) => {
+                            if (error) {
                                 console.error("Error with something, I don't care anymore");
                                 console.error(error);
                             }
-                            for(let result of results){
-                                if(result.artist.toLowerCase() === artist && result.title.toLowerCase() === title){
+                            for (let result of results) {
+                                if (result.artist.toLowerCase() === artist && result.title.toLowerCase() === title) {
                                     //duplicate song
                                     console.log("DUPLICATE FOUND");
-                                    console.log(result.ID,artist,title);
+                                    console.log(result.ID, artist, title);
                                     disableSong(result.ID);
                                 }
                             }
@@ -642,8 +662,8 @@ function createRouter(db) {
 
     function disableSong(songID) {
         let theDate = new Date;
-        theDate.setHours(theDate.getHours()+120);
-       
+        theDate.setHours(theDate.getHours() + 120);
+
         db.query(
             'UPDATE songs SET soft_enabled = 0, reenable_date = ? WHERE ID LIKE ?',
             [theDate, songID],
@@ -657,13 +677,13 @@ function createRouter(db) {
     }
 
     function enableSong(songID) {
-        
+
         db.query(
             'SELECT artist, title FROM songs WHERE ID LIKE ?',
             [songID],
-            (error,results)=>{
-                if(results.length === 1){
-                    console.log("Enabling",results[0].title, " by", results[0].artist);
+            (error, results) => {
+                if (results.length === 1) {
+                    console.log("Enabling", results[0].title, " by", results[0].artist);
                 }
             }
         )
@@ -696,8 +716,8 @@ function createRouter(db) {
                         //at least one song found that has been disabled - test if they should be re-enabled
                         for (let i = 0; i < results.length; i++) {
                             enableDate = new Date(results[i].reenable_date)
-                            
-                            if(theDate > enableDate){
+
+                            if (theDate > enableDate) {
                                 enableSong(results[i].ID);
                             }
                         }
@@ -817,13 +837,13 @@ function createRouter(db) {
 
     function usedAllRequests(day, month, year, numrequests, email) {
 
-        
+
         let date = new Date();
         let newday = date.getDate();
         let newmonth = date.getMonth() + 1;
         let newyear = date.getFullYear();
-        
-        console.log("Testing if user",email," has exceeded their daily limits");
+
+        console.log("Testing if user", email, " has exceeded their daily limits");
 
         if (numrequests > maxDailyRequests) {
             return true;
