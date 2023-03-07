@@ -457,8 +457,8 @@ function createRouter(db) {
     function resetEnableTime(songID){
 
         let theDate = new Date();
-        //theDate.setHours(theDate.getHours() + 6);
-        theDate.setMinutes(theDate.getMinutes() + 10);
+        theDate.setHours(theDate.getHours() + 6);
+        //theDate.setMinutes(theDate.getMinutes() + 10);
         
         db.query(
             'UPDATE songs SET reenable_date = ? WHERE ID LIKE ?',
@@ -566,7 +566,8 @@ function createRouter(db) {
                             } else if (results.length === 1) {
                                 insertIntoRequestTable(results[0].songID, results[0].username, results[0].userIP, results[0].message);
                                 removeFromVotelist(results[0].songID);
-                                ioclient.emit("update queue", "update queue");
+                                ioclient.emit("update votelist", "update votelist");
+                                
                             } else {
                                 console.error("Too many songs retrieved by query (this is a serious fuckup)")
                             }
